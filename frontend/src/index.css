@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-gatex-green: #4caf50;
+  --color-gatex-green-hover: #43a047;
+  --color-gatex-coral: #e85d4c;
+  --color-gatex-bg: #0f1117;
+  --color-gatex-card: #1a1d27;
+  --color-gatex-border: #2a2d3a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-gatex-bg);
+  color: #f1f5f9;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
