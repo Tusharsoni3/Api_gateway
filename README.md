@@ -297,6 +297,4 @@ Every proxied request needs to validate the API key. Hitting PostgreSQL every ti
 
 ---
 
-## License
 
-MIT
