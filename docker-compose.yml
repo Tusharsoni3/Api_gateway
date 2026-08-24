@@ -1,0 +1,95 @@
+services:
+  gateX-db:
+    image: postgres:16-alpine
+    container_name: gateX-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - gatex-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - gatex-network
+
+  gateX-redis:
+    image: redis:7-alpine
+    container_name: gateX-redis
+    restart: unless-stopped
+    volumes:
+      - gatex-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - gatex-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gatex-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@gateX-db:5432/${POSTGRES_DB}
+      REDIS_URL: redis://gateX-redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+
+    depends_on:
+      gateX-db:
+        condition: service_healthy
+      gateX-redis:
+        condition: service_healthy
+    networks:
+      - gatex-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gatex-frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+    depends_on:
+      - backend
+    networks:
+      - gatex-network
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: gatex-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - frontend
+    networks:
+      - gatex-network
+
+networks:
+  gatex-network:
+    driver: bridge
+
+volumes:
+  gatex-db-data:
+  gatex-redis-data:
+  caddy-data:
+  caddy-config:

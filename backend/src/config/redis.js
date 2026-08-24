@@ -1,7 +1,7 @@
 import Redis from 'ioredis';
 
 export const redis = new Redis(process.env.REDIS_URL, {
-    lazyConnect: true,
+    //lazyConnect: true,
     //tls: { rejectUnauthorized: false }
 })
 
@@ -13,4 +13,3 @@ redis.on('error', (err) => {
     console.error('Redis error details:', err.message, err.code)
 })
 
-await redis.connect()
