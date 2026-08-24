@@ -16,7 +16,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use(cors({
-    origin: 'https://gatex.isroot.in',
+    origin: '',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 }));
